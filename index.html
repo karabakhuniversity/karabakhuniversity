@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Karabakh University — Digital Book System</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="header" id="header">
+    <div class="header__inner container">
+
+      <a href="#" class="header__brand">
+        <div class="header__brand-icon" aria-hidden="true">
+          <img src="images/dTzzu1.png" alt="Karabakh University Logo" class="header__brand-logo">
+        </div>
+        <div class="header__brand-text">
+          <span class="header__brand-name">Karabakh University</span>
+          <span class="header__brand-sub">Digital Book Download System</span>
+        </div>
+      </a>
+
+      <button class="header__menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+
+      <nav class="header__nav" id="mainNav" aria-label="Main navigation">
+        <ul class="header__nav-list">
+          <li><a href="#" class="header__nav-link active">Home</a></li>
+          <li><a href="#books" class="header__nav-link">Books</a></li>
+          <li>
+            <a href="https://karabakh.edu.az/" target="_blank" rel="noopener" class="header__nav-link header__nav-link--cta">
+              University Website
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2 10L10 2M10 2H4M10 2V8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+    </div>
+  </header>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero" aria-labelledby="heroTitle">
+    <div class="hero__bg" aria-hidden="true"></div>
+    <div class="container hero__inner">
+      <div class="hero__label">Academic Resource Portal</div>
+      <h1 class="hero__title" id="heroTitle">
+        Karabakh University<br/>
+        <em>Digital Book System</em>
+      </h1>
+      <p class="hero__desc">
+        Convenient access to academic books in PDF format for students and faculty.
+      </p>
+
+      <div class="hero__search-wrap">
+        <label for="searchInput" class="sr-only">Search books</label>
+        <div class="hero__search">
+          <svg class="hero__search-icon" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+            <circle cx="7.5" cy="7.5" r="5.5" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M12 12l3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+          <input
+            type="search"
+            id="searchInput"
+            class="hero__search-input"
+            placeholder="Search by title or author…"
+            autocomplete="off"
+          />
+        </div>
+        <div class="hero__search-hint" id="searchHint" aria-live="polite"></div>
+      </div>
+
+      <div class="hero__stats" aria-label="Library statistics">
+        <div class="hero__stat">
+          <span class="hero__stat-number" id="statCount">8</span>
+          <span class="hero__stat-label">Available Books</span>
+        </div>
+        <div class="hero__stat-divider" aria-hidden="true"></div>
+        <div class="hero__stat">
+          <span class="hero__stat-number">Free</span>
+          <span class="hero__stat-label">PDF Download</span>
+        </div>
+        <div class="hero__stat-divider" aria-hidden="true"></div>
+        <div class="hero__stat">
+          <span class="hero__stat-number">24/7</span>
+          <span class="hero__stat-label">Access</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== BOOKS SECTION ===== -->
+  <main class="books-section" id="books">
+    <div class="container">
+
+      <div class="section-header">
+        <div class="section-header__left">
+          <h2 class="section-header__title">Academic Library</h2>
+          <p class="section-header__sub">Browse and download available textbooks and resources</p>
+        </div>
+        <div class="section-header__right">
+          <div class="filter-tabs" role="tablist" aria-label="Filter by category">
+            <button class="filter-tab active" data-filter="all" role="tab" aria-selected="true">All</button>
+            <button class="filter-tab" data-filter="Mathematics" role="tab" aria-selected="false">Latest Stories</button>
+            <button class="filter-tab" data-filter="Computer Science" role="tab" aria-selected="false">Featured Essays</button>
+            <button class="filter-tab" data-filter="Physics" role="tab" aria-selected="false">Articles</button>
+            <button class="filter-tab" data-filter="History" role="tab" aria-selected="false">Latest Reviews</button>
+            <button class="filter-tab" data-filter="History" role="tab" aria-selected="false">Student Magazines</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="books-grid" id="booksGrid" aria-label="Book list">
+        <!-- Populated by JavaScript -->
+      </div>
+
+      <div class="empty-state" id="emptyState" hidden aria-live="polite">
+        <div class="empty-state__icon" aria-hidden="true">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <path d="M8 12h32v28H8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M16 8h16v4H16z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M18 22h12M18 28h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3 class="empty-state__title">No books found</h3>
+        <p class="empty-state__desc">No results matched your search. Try a different title or author name.</p>
+        <button class="empty-state__reset" id="resetSearch">Clear Search</button>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer" aria-label="Site footer">
+    <div class="footer__top">
+      <div class="container footer__top-inner">
+
+        <div class="footer__brand">
+          <span class="footer__brand-name">Karabakh University</span>
+          <span class="footer__brand-sub">Digital Book Download System</span>
+          <p class="footer__brand-desc">
+            An academic resource platform providing students with convenient access to course materials and textbooks in digital format.
+          </p>
+        </div>
+
+        <div class="footer__links">
+          <h3 class="footer__links-title">Quick Links</h3>
+          <ul class="footer__links-list">
+            <li><a href="#">Home</a></li>
+            <li><a href="#books">Browse Books</a></li>
+            <li>
+              <a href="https://karabakh.edu.az/" target="_blank" rel="noopener">
+                Karabakh University Official Website ↗
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="footer__contact">
+          <h3 class="footer__links-title">Contact</h3>
+          <a href="https://wa.me/994509637690?text=Salam,%20men%20kitab%20yuklemek%20isteyirdim%20saytiniza"
+             target="_blank"
+             rel="noopener noreferrer"
+             class="whatsapp-btn">
+            <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="WhatsApp">
+            WhatsApp ilə əlaqə
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="footer__bottom">
+      <div class="container footer__bottom-inner">
+        <p class="footer__copy">&copy; <span id="footerYear"></span> Karabakh University. All rights reserved.</p>
+        <p class="footer__note">Academic Digital Library Platform</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
