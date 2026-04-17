@@ -143,7 +143,7 @@ function buildCardActions(book) {
         onclick="readPDF('${escapedPdf}')"
         class="btn--view"
       >
-        📖 Read PDF
+        Read
       </button>
     </div>
   `;
