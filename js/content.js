@@ -7,17 +7,14 @@
 
 const supabaseDb = window.supabaseClient;
 
-/* ─── URL PARAMS ─── */
 const params = new URLSearchParams(window.location.search);
 const URL_TYPE = params.get('type') || 'all';
 const URL_QUERY = params.get('q') || '';
 
-/* ─── STATE ─── */
 let activeType = URL_TYPE;
 let searchQuery = URL_QUERY;
 let allContent = [];
 
-/* ─── DOM ─── */
 const grid = document.getElementById('contentGrid');
 const emptyEl = document.getElementById('emptyState');
 const pageTitle = document.getElementById('pageTitle');
@@ -28,7 +25,6 @@ const resultHint = document.getElementById('resultHint');
 const breadcrumb = document.getElementById('breadcrumbType');
 const yearEl = document.getElementById('footerYear');
 
-/* ─── LABELS ─── */
 const CONTENT_TYPES = [
   { value: 'book', label: 'Books' },
   { value: 'article', label: 'Articles' },
@@ -54,7 +50,6 @@ function getMeta(type) {
   return TYPE_META[type] || TYPE_META.all;
 }
 
-/* ─── HELPERS ─── */
 function esc(s) {
   return String(s ?? '')
     .replace(/&/g, '&amp;')
@@ -96,7 +91,6 @@ function getFilteredContent() {
   });
 }
 
-/* ─── BUILD CARD ─── */
 function buildCard(item, delay) {
   const hasPdf = item.fileUrl && item.fileUrl !== '#';
 
@@ -124,7 +118,6 @@ function buildCard(item, delay) {
   `;
 }
 
-/* ─── DATA LOAD ─── */
 async function loadContent() {
   if (!supabaseDb) throw new Error('Supabase is not connected.');
 
@@ -138,7 +131,6 @@ async function loadContent() {
   allContent = (data || []).map(mapRow);
 }
 
-/* ─── RENDER ─── */
 function render() {
   const results = getFilteredContent();
   const meta = getMeta(activeType);
@@ -156,17 +148,16 @@ function render() {
 
   if (!grid) return;
 
-  if (results.length === 0) {
-    grid.innerHTML = '';
-    if (emptyEl) emptyEl.hidden = false;
+  if (results.length > 0) {
+    grid.innerHTML = results.map((item, i) => buildCard(item, Math.min(i * 55, 440))).join('');
+    if (emptyEl) emptyEl.hidden = true;
     return;
   }
 
-  if (emptyEl) emptyEl.hidden = true;
-  grid.innerHTML = results.map((item, i) => buildCard(item, Math.min(i * 55, 440))).join('');
+  grid.innerHTML = '';
+  if (emptyEl) emptyEl.hidden = false;
 }
 
-/* ─── FILTER TABS ─── */
 function buildFilterTabs() {
   if (!filterWrap) return;
 
@@ -203,7 +194,6 @@ function buildFilterTabs() {
   });
 }
 
-/* ─── SEARCH ─── */
 function initSearch() {
   if (!searchInput) return;
 
@@ -221,28 +211,6 @@ function initSearch() {
   });
 }
 
-/* ─── RESET BTN ─── */
-function initReset() {
-  const btn = document.getElementById('resetBtn');
-  if (!btn) return;
-
-  btn.addEventListener('click', () => {
-    searchQuery = '';
-    activeType = 'all';
-
-    if (searchInput) searchInput.value = '';
-
-    const url = new URL(window.location);
-    url.searchParams.delete('q');
-    url.searchParams.delete('type');
-    window.history.replaceState(null, '', url);
-
-    buildFilterTabs();
-    render();
-  });
-}
-
-/* ─── MOBILE NAV ─── */
 function initMobileNav() {
   const toggle = document.getElementById('navToggle');
   const nav = document.getElementById('mainNav');
@@ -261,20 +229,17 @@ function initMobileNav() {
   });
 }
 
-/* ─── MARK ACTIVE NAV LINK ─── */
 function markActiveNav() {
   document.querySelectorAll('.header__nav-link[data-type]').forEach((link) => {
     link.classList.toggle('active', link.dataset.type === activeType);
   });
 }
 
-/* ─── INIT ─── */
 document.addEventListener('DOMContentLoaded', async () => {
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
   buildFilterTabs();
   initSearch();
-  initReset();
   initMobileNav();
 
   try {
