@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Student Ink — Karabakh University Digital Platform</title>
+  <title>Content — Karabakh University Student Ink</title>
   <link rel="stylesheet" href="css/style.css"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -16,7 +16,7 @@
   <div class="header__inner container">
     <a href="index.html" class="header__brand">
       <img src="images/logo.jpg"
-           alt="Karabakh University Logo" class="header__logo"
+           alt="Karabakh University" class="header__logo"
            onerror="this.style.display='none'"/>
       <div class="header__brand-text">
         <span class="header__brand-name">Karabakh University</span>
@@ -30,7 +30,7 @@
 
     <nav id="mainNav" aria-label="Main navigation">
       <ul class="header__nav-list">
-        <li><a href="index.html"                        class="header__nav-link active">Home</a></li>
+        <li><a href="index.html"                        class="header__nav-link">Home</a></li>
         <li><a href="content.html?type=book"            class="header__nav-link" data-type="book">Books</a></li>
         <li><a href="content.html?type=story"           class="header__nav-link" data-type="story">Stories</a></li>
         <li><a href="content.html?type=essay"           class="header__nav-link" data-type="essay">Essays</a></li>
@@ -49,72 +49,55 @@
   </div>
 </header>
 
-<!-- ═══ HERO ═══ -->
-<section class="hero" aria-labelledby="heroTitle">
+<!-- ═══ PAGE HEADER ═══ -->
+<section class="hero" style="padding: 48px 0 44px">
   <div class="hero__bg" aria-hidden="true"></div>
   <div class="container hero__inner">
-    <div class="hero__label">Academic Resource Portal</div>
-    <h1 class="hero__title" id="heroTitle">
-      Your Stories. Your Voice.<br/>
-      Your Ink. <em>STUDENT INK</em>
-    </h1>
-    <p class="hero__desc">
-      Explore articles, essays, stories, reviews, and books from Karabakh University students and faculty.
-    </p>
+    <nav aria-label="Breadcrumb" style="margin-bottom:14px">
+      <ol style="display:flex;align-items:center;gap:8px;list-style:none;font-size:.8125rem;color:rgba(255,255,255,.5)">
+        <li><a href="index.html" style="color:rgba(255,255,255,.6);transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.6)'">Home</a></li>
+        <li aria-hidden="true" style="color:rgba(255,255,255,.3)">›</li>
+        <li style="color:var(--c-accent)" id="breadcrumbType">Content</li>
+      </ol>
+    </nav>
+    <h1 class="hero__title" id="pageTitle" style="font-size:clamp(1.6rem,4vw,2.4rem)">All Content</h1>
+    <p  class="hero__desc" id="pageSub">Browse the complete digital library</p>
 
-    <div class="search-bar" role="search">
-      <svg class="search-bar__icon" width="17" height="17" viewBox="0 0 17 17" fill="none" aria-hidden="true">
-        <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.5"/>
-        <path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
-      <input type="search" id="heroSearch" class="search-bar__input"
-             placeholder="Search by title or author…" autocomplete="off" aria-label="Search content"/>
-    </div>
-
-    <div class="hero__stats" aria-label="Library statistics">
-      <div class="hero__stat">
-        <span class="hero__stat-n" id="statTotal">12</span>
-        <span class="hero__stat-l">Total Items</span>
-      </div>
-      <div class="hero__stat-div" aria-hidden="true"></div>
-      <div class="hero__stat">
-        <span class="hero__stat-n">7</span>
-        <span class="hero__stat-l">Content Types</span>
-      </div>
-      <div class="hero__stat-div" aria-hidden="true"></div>
-      <div class="hero__stat">
-        <span class="hero__stat-n">Free</span>
-        <span class="hero__stat-l">PDF Access</span>
-      </div>
-      <div class="hero__stat-div" aria-hidden="true"></div>
-      <div class="hero__stat">
-        <span class="hero__stat-n">24/7</span>
-        <span class="hero__stat-l">Available</span>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══ FEATURED ═══ -->
-<section class="section section--alt" id="featured">
-  <div class="container">
-    <div class="section-hd">
-      <div class="section-hd__left">
-        <h2 class="section-hd__title">Featured Content</h2>
-        <p class="section-hd__sub">Handpicked selections from the editorial team</p>
-      </div>
-      <a href="content.html" class="link-more">
-        View all
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-          <path d="M2 7h10M7 2l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:8px">
+      <div class="search-bar" role="search" style="max-width:420px;flex:1">
+        <svg class="search-bar__icon" width="17" height="17" viewBox="0 0 17 17" fill="none" aria-hidden="true">
+          <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
         </svg>
-      </a>
-    </div>
-    <div class="content-grid" id="featuredGrid" aria-label="Featured items">
-      <!-- Populated by main.js -->
+        <input type="search" id="contentSearch" class="search-bar__input"
+               placeholder="Search by title or author…" autocomplete="off" aria-label="Search"/>
+      </div>
+      <span id="resultHint" style="font-size:.8125rem;color:rgba(255,255,255,.5)" aria-live="polite"></span>
     </div>
   </div>
 </section>
+
+<!-- ═══ CONTENT ═══ -->
+<main class="section" id="content">
+  <div class="container">
+
+    
+
+    <!-- Grid -->
+    <div class="content-grid" id="contentGrid" aria-label="Content list">
+      <!-- Populated by content.js -->
+    </div>
+
+    <!-- Empty state -->
+    <div class="empty" id="emptyState" hidden aria-live="polite">
+      <div class="empty__icon">📭</div>
+      <h3 class="empty__title">No content found</h3>
+      <p class="empty__desc">Try a different search term or filter, or clear your current selection.</p>
+      <button id="resetBtn" class="btn btn--outline" style="margin-top:14px">Clear Filters</button>
+    </div>
+
+  </div>
+</main>
 
 <!-- ═══ FOOTER ═══ -->
 <footer class="footer">
@@ -125,23 +108,23 @@
           <span class="footer__brand-name">Karabakh University</span>
           <span class="footer__brand-sub">Student Ink — Digital Platform</span>
           <p class="footer__brand-desc">
-            An academic digital library providing students and faculty with open access to books, essays, stories, reviews, and creative works.
+            An academic digital library providing open access to books, essays, articles, stories, and creative works.
           </p>
         </div>
         <div>
-          <h3 class="footer__col-title">Content</h3>
+          <h3 class="footer__col-title">Browse</h3>
           <ul class="footer__list">
             <li><a href="content.html?type=book">Books</a></li>
             <li><a href="content.html?type=article">Articles</a></li>
             <li><a href="content.html?type=essay">Essays</a></li>
             <li><a href="content.html?type=story">Stories</a></li>
-            <li><a href="content.html?type=magazine">Magazines</a></li>
-            <li><a href="content.html?type=art-photo">Art &amp; Photo</a></li>
+            <li><a href="content.html?type=review">Reviews</a></li>
           </ul>
         </div>
         <div>
-          <h3 class="footer__col-title">University</h3>
+          <h3 class="footer__col-title">Links</h3>
           <ul class="footer__list">
+            <li><a href="index.html">Home</a></li>
             <li><a href="https://karabakh.edu.az/" target="_blank" rel="noopener">Official Website ↗</a></li>
             <li><a href="admin-login.html">Admin Panel</a></li>
           </ul>
@@ -158,7 +141,6 @@
 </footer>
 
 <script src="js/data.js"></script>
-<script src="js/main.js"></script>
+<script src="js/content.js"></script>
 </body>
 </html>
-

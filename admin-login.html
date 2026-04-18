@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Login — Karabakh University</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+<div class="login-page">
+  <div class="login-card">
+
+    <div class="login-card__logo">
+      <div class="login-card__logo-icon">
+        <img src="images/logo1.jpg"
+           alt="Karabakh University Logo" class="header__logo"
+           onerror="this.style.display='none'"/>
+      </div>
+      <div>
+        <span class="login-card__logo-text-name">Karabakh University</span>
+        <span class="login-card__logo-text-sub">Student Ink Admin</span>
+      </div>
+    </div>
+
+    <h1 class="login-card__title">Sign In</h1>
+    <p class="login-card__sub">Access the content management panel</p>
+
+    <div class="login-error" id="loginError" role="alert"></div>
+
+    <form id="loginForm" novalidate>
+      <div class="form-group">
+        <label class="form-label" for="loginEmail">Email Address</label>
+        <input type="email" id="loginEmail" class="form-input"
+               placeholder="admin@karabakh.edu.az" autocomplete="email" required/>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="loginPass">Password</label>
+        <input type="password" id="loginPass" class="form-input"
+               placeholder="••••••••" autocomplete="current-password" required/>
+      </div>
+
+      <button type="submit" class="btn btn--primary" style="width:100%;margin-top:10px;padding:12px">
+        Sign In to Admin Panel
+      </button>
+    </form>
+
+    <p style="text-align:center;margin-top:20px;font-size:.8rem;color:var(--c-text-muted)">
+      Demo: <strong>admin@karabakh.edu.az</strong> / <strong>admin123</strong>
+    </p>
+
+    <div style="text-align:center;margin-top:20px;padding-top:20px;border-top:1px solid var(--c-border)">
+      <a href="index.html" style="font-size:.8125rem;color:var(--c-text-muted);transition:color .2s"
+         onmouseover="this.style.color='var(--c-primary)'" onmouseout="this.style.color='var(--c-text-muted)'">
+        ← Return to Student Ink
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>
