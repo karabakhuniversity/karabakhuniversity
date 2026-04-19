@@ -75,19 +75,26 @@ async function loadHomepageContent() {
   const { data, error } = await supabaseDb
     .from('content_items')
     .select('*')
-    .order('created_at', { ascending: false });
+    .eq('type', 'book')
+    .order('created_at', { ascending: false })
+    .limit(4);
 
   if (error) {
     throw error;
   }
 
-  const items = (data || []).map(mapRow);
-  const latestBooks = items
-    .filter((item) => item.type === 'book')
-    .slice(0, 4);
+  const latestBooks = (data || []).map(mapRow);
+
+  const { count, error: countError } = await supabaseDb
+    .from('content_items')
+    .select('*', { count: 'exact', head: true });
+
+  if (countError) {
+    throw countError;
+  }
 
   return {
-    total: items.length,
+    total: count || 0,
     featured: latestBooks
   };
 }
@@ -142,7 +149,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   try {
     const { total, featured } = await loadHomepageContent();
-
     if (statTotal) statTotal.textContent = total;
     renderFeatured(featured);
   } catch (error) {
