@@ -81,13 +81,13 @@ async function loadHomepageContent() {
     throw error;
   }
 
-  const items = (data || []).map(mapRow);
-  const latestBooks = items.filter((item) => item.type === 'book').slice(0, 4);
+ const latestItems = items.slice(0, 4);
 
-  return {
-    total: items.length,
-    featured: latestBooks
-  };
+return {
+  total: items.length,
+  featured: latestItems
+};
+
 }
 
 function renderFeatured(items) {
@@ -150,3 +150,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.error(error);
   }
 });
+
+
