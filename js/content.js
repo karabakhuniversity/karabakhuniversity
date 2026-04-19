@@ -27,7 +27,8 @@ const CONTENT_TYPES = [
   { value: 'magazine', label: 'Magazines' },
   { value: 'story', label: 'Stories' },
   { value: 'review', label: 'Reviews' },
-  { value: 'art-photo', label: 'Art & Photo' }
+  { value: 'art-photo', label: 'Art & Photo' },
+  { value: 'student-spotlight', label: 'Student Spotlight' }
 ];
 
 const TYPE_META = {
@@ -38,7 +39,8 @@ const TYPE_META = {
   magazine: { label: 'Magazines', desc: 'Student and departmental magazines' },
   story: { label: 'Stories', desc: 'Creative fiction and short stories' },
   review: { label: 'Reviews', desc: 'Critical reviews and evaluations' },
-  'art-photo': { label: 'Art & Photo', desc: 'Visual art and photo collections' }
+  'art-photo': { label: 'Art & Photo', desc: 'Visual art and photo collections' },
+  'student-spotlight': { label: 'Student Spotlight', desc: 'Featured student profiles and achievements' }
 };
 
 function getMeta(type) {
@@ -67,7 +69,10 @@ function mapRow(row) {
     description: row.description || '',
     coverImage: row.cover_path || 'https://via.placeholder.com/400x560/1a3d2e/ffffff?text=No+Cover',
     fileUrl: row.file_path || '#',
-    createdAt: row.created_at || ''
+    createdAt: row.created_at || '',
+    studentName: row.student_name || '',
+    department: row.department || '',
+    achievement: row.achievement || ''
   };
 }
 
@@ -80,7 +85,9 @@ function getFilteredContent() {
       !q ||
       item.title.toLowerCase().includes(q) ||
       item.author.toLowerCase().includes(q) ||
-      item.category.toLowerCase().includes(q);
+      item.category.toLowerCase().includes(q) ||
+      (item.studentName && item.studentName.toLowerCase().includes(q)) ||
+      (item.department && item.department.toLowerCase().includes(q));
 
     return matchesType && matchesQuery;
   });
@@ -88,6 +95,10 @@ function getFilteredContent() {
 
 function buildCard(item, delay) {
   const hasPdf = item.fileUrl && item.fileUrl !== '#';
+
+  if (item.type === 'student-spotlight') {
+    return buildSpotlightCard(item, delay);
+  }
 
   const readBtn = hasPdf
     ? `<a href="${esc(item.fileUrl)}" target="_blank" rel="noopener" class="btn btn--primary btn--sm" aria-label="Read ${esc(item.title)}">Read</a>`
@@ -106,6 +117,43 @@ function buildCard(item, delay) {
       <div class="card__body">
         <h3 class="card__title">${esc(item.title)}</h3>
         <p class="card__author">${esc(item.author)}</p>
+        <div class="card__divider" aria-hidden="true"></div>
+        <div class="card__actions">${readBtn}</div>
+      </div>
+    </article>
+  `;
+}
+
+function buildSpotlightCard(item, delay) {
+  const hasPdf = item.fileUrl && item.fileUrl !== '#';
+
+  const readBtn = hasPdf
+    ? `<a href="${esc(item.fileUrl)}" target="_blank" rel="noopener" class="btn btn--primary btn--sm" aria-label="Read more about ${esc(item.title)}">Read More</a>`
+    : '';
+
+  const department = item.department
+    ? `<p class="card__meta-line"><span class="card__meta-icon">🎓</span>${esc(item.department)}</p>`
+    : '';
+
+  const achievement = item.achievement
+    ? `<p class="card__meta-line"><span class="card__meta-icon">🏆</span>${esc(item.achievement)}</p>`
+    : '';
+
+  return `
+    <article class="card card--spotlight" style="animation-delay:${delay}ms" data-id="${esc(item.id)}">
+      <div class="card__cover-wrap">
+        <img class="card__cover card__cover--portrait"
+             src="${esc(item.coverImage)}"
+             alt="Photo of ${esc(item.title)}"
+             loading="lazy"
+             onerror="this.src='https://via.placeholder.com/400x400/1a3d2e/ffffff?text=Student'"/>
+        <span class="card__badge card__badge--student-spotlight">Student Spotlight</span>
+      </div>
+      <div class="card__body">
+        <h3 class="card__title">${esc(item.title)}</h3>
+        <p class="card__author">${esc(item.author)}</p>
+        ${department}
+        ${achievement}
         <div class="card__divider" aria-hidden="true"></div>
         <div class="card__actions">${readBtn}</div>
       </div>

@@ -13,7 +13,8 @@ const CONTENT_TYPES = [
   { value: 'essay', label: 'Essay' },
   { value: 'magazine', label: 'Magazine' },
   { value: 'story', label: 'Story' },
-  { value: 'art-photo', label: 'Art & Photo' }
+  { value: 'art-photo', label: 'Art & Photo' },
+  { value: 'student-spotlight', label: 'Student Spotlight' }
 ];
 
 /* ─── TOAST ─── */
@@ -130,6 +131,9 @@ function mapRow(row) {
     publicationDate: row.publication_date || '',
     reviewedItem: row.reviewed_item || '',
     reviewerName: row.reviewer_name || '',
+    studentName: row.student_name || '',
+    department: row.department || '',
+    achievement: row.achievement || '',
     createdAt: row.created_at ? new Date(row.created_at).toLocaleDateString() : ''
   };
 }
@@ -478,6 +482,9 @@ async function initFormPage() {
       if (editItem.publicationDate) setField('fieldPubDate', editItem.publicationDate);
       if (editItem.reviewedItem) setField('fieldReviewedItem', editItem.reviewedItem);
       if (editItem.reviewerName) setField('fieldReviewerName', editItem.reviewerName);
+      if (editItem.studentName) setField('fieldStudentName', editItem.studentName);
+      if (editItem.department) setField('fieldDepartment', editItem.department);
+      if (editItem.achievement) setField('fieldAchievement', editItem.achievement);
 
       toggleDynamicFields(editItem.type);
     } catch (error) {
@@ -525,7 +532,10 @@ async function initFormPage() {
       issue_number: type === 'magazine' ? (getField('fieldIssueNumber') || null) : null,
       publication_date: type === 'magazine' ? (getField('fieldPubDate') || null) : null,
       reviewed_item: type === 'review' ? (getField('fieldReviewedItem') || null) : null,
-      reviewer_name: type === 'review' ? (getField('fieldReviewerName') || null) : null
+      reviewer_name: type === 'review' ? (getField('fieldReviewerName') || null) : null,
+      student_name: type === 'student-spotlight' ? (getField('fieldStudentName') || null) : null,
+      department: type === 'student-spotlight' ? (getField('fieldDepartment') || null) : null,
+      achievement: type === 'student-spotlight' ? (getField('fieldAchievement') || null) : null
     };
 
     try {
@@ -767,9 +777,11 @@ function getField(id) {
 function toggleDynamicFields(type) {
   const magFields = document.getElementById('magazineFields');
   const revFields = document.getElementById('reviewFields');
+  const spotFields = document.getElementById('spotlightFields');
 
   if (magFields) magFields.classList.toggle('visible', type === 'magazine');
   if (revFields) revFields.classList.toggle('visible', type === 'review');
+  if (spotFields) spotFields.classList.toggle('visible', type === 'student-spotlight');
 }
 
 /* ─── INIT ─── */
