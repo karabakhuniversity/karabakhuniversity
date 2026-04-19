@@ -28,16 +28,16 @@
       <span></span><span></span><span></span>
     </button>
 
-    <nav id="mainNav" aria-label="Main navigation">
+    <nav class="header__nav" id="mainNav" aria-label="Main navigation">
       <ul class="header__nav-list">
-        <li><a href="index.html"                        class="header__nav-link">Home</a></li>
-        <li><a href="content.html?type=book"            class="header__nav-link" data-type="book">Books</a></li>
-        <li><a href="content.html?type=story"           class="header__nav-link" data-type="story">Stories</a></li>
-        <li><a href="content.html?type=essay"           class="header__nav-link" data-type="essay">Essays</a></li>
-        <li><a href="content.html?type=article"         class="header__nav-link" data-type="article">Articles</a></li>
-        <li><a href="content.html?type=review"          class="header__nav-link" data-type="review">Reviews</a></li>
-        <li><a href="content.html?type=magazine"        class="header__nav-link" data-type="magazine">Magazines</a></li>
-        <li><a href="content.html?type=art-photo"       class="header__nav-link" data-type="art-photo">Art &amp; Photo</a></li>
+        <li><a href="index.html" class="header__nav-link">Home</a></li>
+        <li><a href="content.html?type=book" class="header__nav-link" data-type="book">Books</a></li>
+        <li><a href="content.html?type=story" class="header__nav-link" data-type="story">Stories</a></li>
+        <li><a href="content.html?type=essay" class="header__nav-link" data-type="essay">Essays</a></li>
+        <li><a href="content.html?type=article" class="header__nav-link" data-type="article">Articles</a></li>
+        <li><a href="content.html?type=review" class="header__nav-link" data-type="review">Reviews</a></li>
+        <li><a href="content.html?type=magazine" class="header__nav-link" data-type="magazine">Magazines</a></li>
+        <li><a href="content.html?type=art-photo" class="header__nav-link" data-type="art-photo">Art &amp; Photo</a></li>
         <li><a href="https://karabakh.edu.az/" target="_blank" rel="noopener" class="header__nav-link header__nav-link--ext">
           University
           <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
@@ -61,7 +61,7 @@
       </ol>
     </nav>
     <h1 class="hero__title" id="pageTitle" style="font-size:clamp(1.6rem,4vw,2.4rem)">All Content</h1>
-    <p  class="hero__desc" id="pageSub">Browse the complete digital library</p>
+    <p class="hero__desc" id="pageSub">Browse the complete digital library</p>
 
     <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:8px">
       <div class="search-bar" role="search" style="max-width:420px;flex:1">
@@ -81,14 +81,15 @@
 <main class="section" id="content">
   <div class="container">
 
-    
-
-    <!-- Grid -->
     <div class="content-grid" id="contentGrid" aria-label="Content list">
       <!-- Populated by content.js -->
     </div>
 
-
+    <div class="empty" id="emptyState" hidden>
+      <div class="empty__icon">📚</div>
+      <p class="empty__title">No content found.</p>
+      <p class="empty__desc">Try another search or choose a different category.</p>
+    </div>
 
   </div>
 </main>
@@ -171,6 +172,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
-<script src="js/admin.js"></script>
+<script src="js/content.js"></script>
 </body>
 </html>
