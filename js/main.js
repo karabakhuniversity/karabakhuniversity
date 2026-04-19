@@ -81,13 +81,13 @@ async function loadHomepageContent() {
     throw error;
   }
 
- const latestItems = items.slice(0, 4);
+  const items = (data || []).map(mapRow);
+  const latestItems = items.slice(0, 4);
 
-return {
-  total: items.length,
-  featured: latestItems
-};
-
+  return {
+    total: items.length,
+    featured: latestItems
+  };
 }
 
 function renderFeatured(items) {
@@ -95,7 +95,7 @@ function renderFeatured(items) {
 
   featuredGrid.innerHTML = items.length
     ? items.map((item, index) => buildCard(item, index * 60)).join('')
-    : `<div class="empty"><div class="empty__icon">📚</div><p class="empty__title">No books yet.</p></div>`;
+    : `<div class="empty"><div class="empty__icon">📚</div><p class="empty__title">No content yet.</p></div>`;
 }
 
 function initHeroSearch() {
@@ -150,5 +150,3 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.error(error);
   }
 });
-
-
