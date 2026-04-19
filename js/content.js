@@ -1,8 +1,3 @@
-/**
- * content.js — Content Listing Page Logic
- * Uses Supabase instead of local data.js
- */
-
 'use strict';
 
 const supabaseDb = window.supabaseClient;
@@ -150,48 +145,18 @@ function render() {
 
   if (results.length > 0) {
     grid.innerHTML = results.map((item, i) => buildCard(item, Math.min(i * 55, 440))).join('');
-    if (emptyEl) emptyEl.hidden = true;
+    if (emptyEl) {
+      emptyEl.hidden = true;
+      emptyEl.style.display = 'none';
+    }
     return;
   }
 
   grid.innerHTML = '';
-  if (emptyEl) emptyEl.hidden = false;
-}
-
-function buildFilterTabs() {
-  if (!filterWrap) return;
-
-  const types = [{ value: 'all', label: 'All' }, ...CONTENT_TYPES];
-
-  filterWrap.innerHTML = types.map((t) => `
-    <button class="filter-tab${activeType === t.value ? ' active' : ''}"
-            data-type="${t.value}"
-            role="tab"
-            aria-selected="${activeType === t.value}">
-      ${t.label}
-    </button>
-  `).join('');
-
-  filterWrap.querySelectorAll('.filter-tab').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      filterWrap.querySelectorAll('.filter-tab').forEach((b) => {
-        b.classList.remove('active');
-        b.setAttribute('aria-selected', 'false');
-      });
-
-      btn.classList.add('active');
-      btn.setAttribute('aria-selected', 'true');
-      activeType = btn.dataset.type;
-
-      const url = new URL(window.location);
-      activeType === 'all'
-        ? url.searchParams.delete('type')
-        : url.searchParams.set('type', activeType);
-
-      window.history.replaceState(null, '', url);
-      render();
-    });
-  });
+  if (emptyEl) {
+    emptyEl.hidden = false;
+    emptyEl.style.display = 'flex';
+  }
 }
 
 function initSearch() {
@@ -238,7 +203,11 @@ function markActiveNav() {
 document.addEventListener('DOMContentLoaded', async () => {
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-  buildFilterTabs();
+  if (emptyEl) {
+    emptyEl.hidden = true;
+    emptyEl.style.display = 'none';
+  }
+
   initSearch();
   initMobileNav();
 
@@ -248,7 +217,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     render();
   } catch (error) {
     if (grid) grid.innerHTML = '';
-    if (emptyEl) emptyEl.hidden = false;
+    if (emptyEl) {
+      emptyEl.hidden = false;
+      emptyEl.style.display = 'flex';
+    }
     if (resultHint) resultHint.textContent = 'Failed to load content.';
     console.error(error);
   }
