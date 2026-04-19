@@ -13,7 +13,6 @@ const CONTENT_TYPES = [
   { value: 'essay', label: 'Essay' },
   { value: 'magazine', label: 'Magazine' },
   { value: 'story', label: 'Story' },
-  { value: 'review', label: 'Review' },
   { value: 'art-photo', label: 'Art & Photo' }
 ];
 
