@@ -15,7 +15,6 @@ const emptyEl = document.getElementById('emptyState');
 const pageTitle = document.getElementById('pageTitle');
 const pageSub = document.getElementById('pageSub');
 const searchInput = document.getElementById('contentSearch');
-const filterWrap = document.getElementById('filterTabs');
 const resultHint = document.getElementById('resultHint');
 const breadcrumb = document.getElementById('breadcrumbType');
 const yearEl = document.getElementById('footerYear');
@@ -78,7 +77,6 @@ function mapRow(row) {
 
 function getFilteredContent() {
   const q = searchQuery.trim().toLowerCase();
-
   return allContent.filter((item) => {
     const matchesType = activeType === 'all' || item.type === activeType;
     const matchesQuery =
@@ -88,20 +86,164 @@ function getFilteredContent() {
       item.category.toLowerCase().includes(q) ||
       (item.studentName && item.studentName.toLowerCase().includes(q)) ||
       (item.department && item.department.toLowerCase().includes(q));
-
     return matchesType && matchesQuery;
   });
 }
 
-function buildCard(item, delay) {
-  const hasPdf = item.fileUrl && item.fileUrl !== '#';
+/* ─── COMMENTS ─── */
 
-  if (item.type === 'student-spotlight') {
-    return buildSpotlightCard(item, delay);
+function formatDate(iso) {
+  if (!iso) return '';
+  return new Date(iso).toLocaleDateString('az-AZ', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+async function loadApprovedComments(contentId) {
+  if (!supabaseDb) return [];
+  const { data, error } = await supabaseDb
+    .from('comments')
+    .select('id, author_name, body, created_at')
+    .eq('content_id', contentId)
+    .eq('approved', true)
+    .order('created_at', { ascending: true });
+  if (error) return [];
+  return data || [];
+}
+
+async function submitComment(contentId, authorName, body) {
+  if (!supabaseDb) throw new Error('Supabase not connected.');
+  const { error } = await supabaseDb
+    .from('comments')
+    .insert([{ content_id: contentId, author_name: authorName, body, approved: false }]);
+  if (error) throw error;
+}
+
+function renderCommentList(contentId, comments) {
+  const list = document.getElementById(`clist-${contentId}`);
+  const countEl = document.getElementById(`ccount-${contentId}`);
+  if (!list) return;
+
+  if (countEl) countEl.textContent = comments.length > 0 ? `(${comments.length})` : '';
+
+  if (comments.length === 0) {
+    list.innerHTML = `<p class="comments-empty">There are no comments yet. Be the first to comment!</p>`;
+    return;
   }
 
+  list.innerHTML = comments.map((c) => `
+    <div class="comment-item">
+      <div class="comment-item__header">
+        <span class="comment-item__author">${esc(c.author_name)}</span>
+        <span class="comment-item__date">${formatDate(c.created_at)}</span>
+      </div>
+      <p class="comment-item__body">${esc(c.body)}</p>
+    </div>
+  `).join('');
+}
+
+function buildCommentSection(itemId) {
+  return `
+    <div class="comments-section">
+      <button class="comments-toggle" data-id="${esc(itemId)}" aria-expanded="false">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+          <path d="M1 2.5h11M1 6.5h7M1 10.5h5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        Reviews
+        <span class="comments-toggle__count" id="ccount-${esc(itemId)}"></span>
+      </button>
+
+      <div class="comments-body" id="cbody-${esc(itemId)}" hidden>
+        <div class="comments-list" id="clist-${esc(itemId)}">
+          <p class="comments-loading">Loading…</p>
+        </div>
+
+        <form class="comment-form" id="cform-${esc(itemId)}" novalidate>
+          <p class="comment-form__title">Write a comment</p>
+          <input
+            type="text"
+            class="comment-form__input"
+            placeholder="Name…"
+            maxlength="80"
+            required
+            aria-label="Ad"
+          />
+          <textarea
+            class="comment-form__textarea"
+            placeholder="your comment…"
+            rows="3"
+            maxlength="1000"
+            required
+            aria-label="Comment"
+          ></textarea>
+          <div class="comment-form__footer">
+            <span class="comment-form__note">It will appear after admin approval.</span>
+            <button type="submit" class="btn btn--primary btn--sm">Submit</button>
+          </div>
+          <p class="comment-form__success" hidden>✓ Your comment has been submitted, awaiting approval.</p>
+        </form>
+      </div>
+    </div>
+  `;
+}
+
+function initCommentSection(itemId) {
+  const toggleBtn = document.querySelector(`.comments-toggle[data-id="${itemId}"]`);
+  const body = document.getElementById(`cbody-${itemId}`);
+  const form = document.getElementById(`cform-${itemId}`);
+  if (!toggleBtn || !body || !form) return;
+
+  let loaded = false;
+
+  toggleBtn.addEventListener('click', async () => {
+    const opening = body.hidden;
+    body.hidden = !opening;
+    toggleBtn.setAttribute('aria-expanded', String(opening));
+
+    if (opening && !loaded) {
+      loaded = true;
+      const comments = await loadApprovedComments(itemId);
+      renderCommentList(itemId, comments);
+    }
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const nameInput = form.querySelector('input');
+    const textInput = form.querySelector('textarea');
+    const successMsg = form.querySelector('.comment-form__success');
+    const submitBtn = form.querySelector('button[type="submit"]');
+
+    const name = nameInput.value.trim();
+    const text = textInput.value.trim();
+    if (!name) { nameInput.focus(); return; }
+    if (!text) { textInput.focus(); return; }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending…';
+
+    try {
+      await submitComment(itemId, name, text);
+      nameInput.value = '';
+      textInput.value = '';
+      if (successMsg) successMsg.hidden = false;
+      setTimeout(() => { if (successMsg) successMsg.hidden = true; }, 4000);
+    } catch (err) {
+      alert('An error occurred. Please try again.');
+      console.error(err);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit';
+    }
+  });
+}
+
+/* ─── CARD BUILDERS ─── */
+
+function buildCard(item, delay) {
+  if (item.type === 'student-spotlight') return buildSpotlightCard(item, delay);
+
+  const hasPdf = item.fileUrl && item.fileUrl !== '#';
   const readBtn = hasPdf
-    ? `<a href="${esc(item.fileUrl)}" target="_blank" rel="noopener" class="btn btn--primary btn--sm" aria-label="Read ${esc(item.title)}">Read</a>`
+    ? `<a href="${esc(item.fileUrl)}" target="_blank" rel="noopener" class="btn btn--primary btn--sm">Read</a>`
     : `<span class="btn btn--unavailable btn--sm">PDF Unavailable</span>`;
 
   return `
@@ -120,15 +262,15 @@ function buildCard(item, delay) {
         <div class="card__divider" aria-hidden="true"></div>
         <div class="card__actions">${readBtn}</div>
       </div>
+      ${buildCommentSection(item.id)}
     </article>
   `;
 }
 
 function buildSpotlightCard(item, delay) {
   const hasPdf = item.fileUrl && item.fileUrl !== '#';
-
   const readBtn = hasPdf
-    ? `<a href="${esc(item.fileUrl)}" target="_blank" rel="noopener" class="btn btn--primary btn--sm" aria-label="Read more about ${esc(item.title)}">Read More</a>`
+    ? `<a href="${esc(item.fileUrl)}" target="_blank" rel="noopener" class="btn btn--primary btn--sm">Read More</a>`
     : '';
 
   const department = item.department
@@ -157,20 +299,20 @@ function buildSpotlightCard(item, delay) {
         <div class="card__divider" aria-hidden="true"></div>
         <div class="card__actions">${readBtn}</div>
       </div>
+      ${buildCommentSection(item.id)}
     </article>
   `;
 }
 
+/* ─── LOAD & RENDER ─── */
+
 async function loadContent() {
   if (!supabaseDb) throw new Error('Supabase is not connected.');
-
   const { data, error } = await supabaseDb
     .from('content_items')
     .select('*')
     .order('created_at', { ascending: false });
-
   if (error) throw error;
-
   allContent = (data || []).map(mapRow);
 }
 
@@ -193,32 +335,22 @@ function render() {
 
   if (results.length > 0) {
     grid.innerHTML = results.map((item, i) => buildCard(item, Math.min(i * 55, 440))).join('');
-    if (emptyEl) {
-      emptyEl.hidden = true;
-      emptyEl.style.display = 'none';
-    }
+    if (emptyEl) { emptyEl.hidden = true; emptyEl.style.display = 'none'; }
+    results.forEach((item) => initCommentSection(item.id));
     return;
   }
 
   grid.innerHTML = '';
-  if (emptyEl) {
-    emptyEl.hidden = false;
-    emptyEl.style.display = 'flex';
-  }
+  if (emptyEl) { emptyEl.hidden = false; emptyEl.style.display = 'flex'; }
 }
 
 function initSearch() {
   if (!searchInput) return;
-
   searchInput.value = searchQuery;
   searchInput.addEventListener('input', () => {
     searchQuery = searchInput.value;
-
     const url = new URL(window.location);
-    searchQuery
-      ? url.searchParams.set('q', searchQuery)
-      : url.searchParams.delete('q');
-
+    searchQuery ? url.searchParams.set('q', searchQuery) : url.searchParams.delete('q');
     window.history.replaceState(null, '', url);
     render();
   });
@@ -228,12 +360,10 @@ function initMobileNav() {
   const toggle = document.getElementById('navToggle');
   const nav = document.getElementById('mainNav');
   if (!toggle || !nav) return;
-
   toggle.addEventListener('click', () => {
     const open = nav.classList.toggle('open');
     toggle.setAttribute('aria-expanded', String(open));
   });
-
   nav.querySelectorAll('a').forEach((a) => {
     a.addEventListener('click', () => {
       nav.classList.remove('open');
@@ -250,11 +380,7 @@ function markActiveNav() {
 
 document.addEventListener('DOMContentLoaded', async () => {
   if (yearEl) yearEl.textContent = new Date().getFullYear();
-
-  if (emptyEl) {
-    emptyEl.hidden = true;
-    emptyEl.style.display = 'none';
-  }
+  if (emptyEl) { emptyEl.hidden = true; emptyEl.style.display = 'none'; }
 
   initSearch();
   initMobileNav();
@@ -265,10 +391,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     render();
   } catch (error) {
     if (grid) grid.innerHTML = '';
-    if (emptyEl) {
-      emptyEl.hidden = false;
-      emptyEl.style.display = 'flex';
-    }
+    if (emptyEl) { emptyEl.hidden = false; emptyEl.style.display = 'flex'; }
     if (resultHint) resultHint.textContent = 'Failed to load content.';
     console.error(error);
   }
