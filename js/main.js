@@ -8,12 +8,10 @@ const supabaseDb = window.supabaseClient;
 
 const CONTENT_TYPES = [
   { value: 'book', label: 'Book' },
-  { value: 'article', label: 'Article' },
+  { value: 'article', label: 'Magazines & Articles' },
   { value: 'essay', label: 'Essay' },
-  { value: 'magazine', label: 'Magazine' },
   { value: 'story', label: 'Story' },
-  { value: 'review', label: 'Review' },
-  { value: 'art-photo', label: 'Art & Photo' }
+  { value: 'student-spotlight', label: 'Student Spotlight' }
 ];
 
 function escHtml(s) {
@@ -50,10 +48,12 @@ function buildCard(item, delay = 0) {
   return `
     <article class="card" style="animation-delay:${delay}ms">
       <div class="card__cover-wrap">
-        <img class="card__cover"
+        <img class="card__cover js-enlarge-image"
              src="${escHtml(item.coverImage)}"
              alt="Cover: ${escHtml(item.title)}"
              loading="lazy"
+             data-fullsrc="${escHtml(item.coverImage)}"
+             data-title="${escHtml(item.title)}"
              onerror="this.src='https://via.placeholder.com/400x560/1a3d2e/ffffff?text=No+Cover'"/>
         <span class="card__badge card__badge--${escHtml(item.type)}">${escHtml(typeLabel(item.type))}</span>
       </div>
@@ -75,6 +75,7 @@ async function loadHomepageContent() {
   const { data, error } = await supabaseDb
     .from('content_items')
     .select('*')
+    .in('type', CONTENT_TYPES.map((item) => item.value))
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -132,11 +133,104 @@ function initMobileNav() {
   });
 }
 
+function ensureImageLightbox() {
+  if (document.getElementById('imageLightbox')) return;
+
+  const style = document.createElement('style');
+  style.textContent = `
+    .js-enlarge-image { cursor: zoom-in; }
+    .image-lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.82);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      z-index: 9999;
+    }
+    .image-lightbox.open { display: flex; }
+    .image-lightbox__dialog {
+      position: relative;
+      max-width: min(92vw, 980px);
+      max-height: 92vh;
+      width: fit-content;
+    }
+    .image-lightbox__img {
+      display: block;
+      max-width: 100%;
+      max-height: calc(92vh - 56px);
+      border-radius: 18px;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+    }
+    .image-lightbox__caption {
+      margin-top: 12px;
+      text-align: center;
+      color: #fff;
+      font: 500 14px/1.4 'DM Sans', sans-serif;
+    }
+    .image-lightbox__close {
+      position: absolute;
+      top: -14px;
+      right: -14px;
+      width: 38px;
+      height: 38px;
+      border: 0;
+      border-radius: 999px;
+      background: #fff;
+      color: #111;
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+    }
+  `;
+  document.head.appendChild(style);
+
+  const lightbox = document.createElement('div');
+  lightbox.id = 'imageLightbox';
+  lightbox.className = 'image-lightbox';
+  lightbox.innerHTML = `
+    <div class="image-lightbox__dialog" role="dialog" aria-modal="true" aria-label="Image preview">
+      <button type="button" class="image-lightbox__close" aria-label="Close preview">×</button>
+      <img class="image-lightbox__img" alt="Expanded cover image"/>
+      <p class="image-lightbox__caption"></p>
+    </div>
+  `;
+  document.body.appendChild(lightbox);
+
+  const closeBtn = lightbox.querySelector('.image-lightbox__close');
+  const img = lightbox.querySelector('.image-lightbox__img');
+  const caption = lightbox.querySelector('.image-lightbox__caption');
+
+  function closeLightbox() {
+    lightbox.classList.remove('open');
+    img.src = '';
+    caption.textContent = '';
+  }
+
+  document.addEventListener('click', (event) => {
+    const trigger = event.target.closest('.js-enlarge-image');
+    if (!trigger) return;
+    img.src = trigger.dataset.fullsrc || trigger.getAttribute('src') || '';
+    caption.textContent = trigger.dataset.title || trigger.getAttribute('alt') || '';
+    lightbox.classList.add('open');
+  });
+
+  closeBtn?.addEventListener('click', closeLightbox);
+  lightbox.addEventListener('click', (event) => {
+    if (event.target === lightbox) closeLightbox();
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && lightbox.classList.contains('open')) closeLightbox();
+  });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
   initHeroSearch();
   initMobileNav();
+  ensureImageLightbox();
 
   try {
     const { total, featured } = await loadHomepageContent();

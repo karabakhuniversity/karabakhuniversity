@@ -12,8 +12,6 @@
 <body>
 
 <div class="admin-wrap">
-
-  <!-- ═══ SIDEBAR ═══ -->
   <aside class="admin-sidebar" id="adminSidebar" aria-label="Admin navigation">
     <div class="sidebar__brand">
       <span class="sidebar__brand-name">Karabakh University</span>
@@ -26,12 +24,10 @@
       <a href="admin-dashboard.html" class="sidebar__link"><span class="sidebar__link__icon">📋</span> All Content</a>
 
       <span class="sidebar__label">By Type</span>
-      <a href="admin-dashboard.html?type=book"             class="sidebar__link"><span class="sidebar__link__icon">📖</span> Books</a>
-      <a href="admin-dashboard.html?type=article"          class="sidebar__link"><span class="sidebar__link__icon">📰</span> Articles</a>
-      <a href="admin-dashboard.html?type=essay"            class="sidebar__link"><span class="sidebar__link__icon">✍️</span> Essays</a>
-  
-      <a href="admin-dashboard.html?type=story"            class="sidebar__link"><span class="sidebar__link__icon">📓</span> Stories</a>
-      <a href="admin-dashboard.html?type=art-photo"        class="sidebar__link"><span class="sidebar__link__icon">🖼️</span> Art &amp; Photo</a>
+      <a href="admin-dashboard.html?type=book" class="sidebar__link"><span class="sidebar__link__icon">📖</span> Books</a>
+      <a href="admin-dashboard.html?type=article" class="sidebar__link"><span class="sidebar__link__icon">📰</span> Magazines &amp; Articles</a>
+      <a href="admin-dashboard.html?type=essay" class="sidebar__link"><span class="sidebar__link__icon">✍️</span> Essays</a>
+      <a href="admin-dashboard.html?type=story" class="sidebar__link"><span class="sidebar__link__icon">📓</span> Stories</a>
       <a href="admin-dashboard.html?type=student-spotlight" class="sidebar__link"><span class="sidebar__link__icon">⭐</span> Student Spotlight</a>
 
       <span class="sidebar__label">Actions</span>
@@ -44,10 +40,7 @@
     </div>
   </aside>
 
-  <!-- ═══ MAIN ═══ -->
   <div class="admin-main">
-
-    <!-- Topbar -->
     <header class="admin-topbar">
       <div style="display:flex;align-items:center;gap:14px">
         <button class="btn btn--outline btn--sm btn--icon" id="sidebarToggle" aria-label="Toggle sidebar" style="display:none">
@@ -62,55 +55,48 @@
       </div>
     </header>
 
-    <!-- Form -->
     <div class="form-page">
       <div class="form-card">
         <h2 class="form-title" id="formTitleCard">New Content</h2>
-        <p  class="form-sub"   id="formSub">Fill in the details below to publish new content.</p>
+        <p class="form-sub" id="formSub">Fill in the details below to publish new content.</p>
 
         <form id="contentForm" novalidate>
-
-          <!-- ─ Core Info ─ -->
           <p class="form-section-title">Core Information</p>
 
           <div class="form-group">
             <label class="form-label" for="fieldType">Content Type <span>*</span></label>
             <select id="fieldType" class="form-select" required>
               <option value="">— Select Type —</option>
-              <!-- Populated by admin.js -->
             </select>
           </div>
 
           <div class="form-row">
             <div class="form-group">
               <label class="form-label" for="fieldTitle">Title <span>*</span></label>
-              <input type="text" id="fieldTitle" class="form-input" placeholder="Enter title…" required/>
+              <input type="text" id="fieldTitle" class="form-input" placeholder="Enter title..." required/>
             </div>
             <div class="form-group">
               <label class="form-label" for="fieldAuthor">Author</label>
-              <input type="text" id="fieldAuthor" class="form-input" placeholder="Author name…"/>
+              <input type="text" id="fieldAuthor" class="form-input" placeholder="Author name..."/>
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
               <label class="form-label" for="fieldCategory">Category</label>
-              <input type="text" id="fieldCategory" class="form-input" placeholder="e.g. Mathematics, Fiction…"/>
+              <input type="text" id="fieldCategory" class="form-input" placeholder="e.g. Literature, Science..."/>
             </div>
             <div class="form-group" style="grid-column:1/-1">
               <label class="form-label" for="fieldDesc">Description</label>
-              <textarea id="fieldDesc" class="form-textarea" placeholder="Short description or abstract…"></textarea>
+              <textarea id="fieldDesc" class="form-textarea" placeholder="Short description or abstract..."></textarea>
             </div>
           </div>
 
           <div class="form-divider"></div>
 
-          <!-- ─ Files ─ -->
           <p class="form-section-title">Files &amp; Media</p>
 
           <div class="form-row">
-
-            <!-- Cover Image Upload -->
             <div class="form-group">
               <label class="form-label" for="fieldCoverFile">Cover Image</label>
               <div class="upload-zone" id="coverUploadZone">
@@ -138,7 +124,6 @@
               <input type="hidden" id="fieldCoverUrl"/>
             </div>
 
-            <!-- PDF Upload -->
             <div class="form-group">
               <label class="form-label" for="fieldPdfFile">PDF File</label>
               <div class="upload-zone upload-zone--pdf" id="pdfUploadZone">
@@ -177,66 +162,31 @@
               </div>
               <input type="hidden" id="fieldPdfUrl"/>
             </div>
-
           </div>
 
           <div class="form-divider"></div>
 
-          <!-- ─ Magazine (dynamic) ─ -->
-          <div class="dynamic-fields" id="magazineFields">
-            <p class="form-section-title">Magazine Details</p>
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label" for="fieldIssueNumber">Issue Number</label>
-                <input type="text" id="fieldIssueNumber" class="form-input" placeholder="e.g. Vol. 12, Issue 3"/>
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="fieldPubDate">Publication Date</label>
-                <input type="date" id="fieldPubDate" class="form-input"/>
-              </div>
-            </div>
-            <div class="form-divider"></div>
-          </div>
-
-          <!-- ─ Review (dynamic) ─ -->
-          <div class="dynamic-fields" id="reviewFields">
-            <p class="form-section-title">Review Details</p>
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label" for="fieldReviewedItem">Reviewed Item</label>
-                <input type="text" id="fieldReviewedItem" class="form-input" placeholder="Book / Film / Exhibition title…"/>
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="fieldReviewerName">Reviewer Name</label>
-                <input type="text" id="fieldReviewerName" class="form-input" placeholder="Reviewer's full name…"/>
-              </div>
-            </div>
-            <div class="form-divider"></div>
-          </div>
-
-          <!-- ─ Student Spotlight (dynamic) ─ -->
           <div class="dynamic-fields" id="spotlightFields">
             <p class="form-section-title">Student Spotlight Details</p>
             <div class="form-row">
               <div class="form-group">
                 <label class="form-label" for="fieldStudentName">Student Full Name</label>
-                <input type="text" id="fieldStudentName" class="form-input" placeholder="Student's full name…"/>
+                <input type="text" id="fieldStudentName" class="form-input" placeholder="Student's full name..."/>
               </div>
               <div class="form-group">
                 <label class="form-label" for="fieldDepartment">Department / Faculty</label>
-                <input type="text" id="fieldDepartment" class="form-input" placeholder="e.g. Faculty of Engineering…"/>
+                <input type="text" id="fieldDepartment" class="form-input" placeholder="e.g. Faculty of Engineering..."/>
               </div>
             </div>
             <div class="form-row">
               <div class="form-group" style="grid-column:1/-1">
                 <label class="form-label" for="fieldAchievement">Achievement / Highlight</label>
-                <input type="text" id="fieldAchievement" class="form-input" placeholder="e.g. Best Graduate 2024, Research Award…"/>
+                <input type="text" id="fieldAchievement" class="form-input" placeholder="e.g. Best Graduate 2024, Research Award..."/>
               </div>
             </div>
             <div class="form-divider"></div>
           </div>
 
-          <!-- ─ Actions ─ -->
           <div class="form-actions">
             <button type="submit" class="btn btn--primary" style="min-width:140px">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
@@ -246,13 +196,11 @@
             </button>
             <button type="button" class="btn btn--outline" id="cancelBtn">Cancel</button>
           </div>
-
         </form>
       </div>
     </div>
-
-  </div><!-- /admin-main -->
-</div><!-- /admin-wrap -->
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>

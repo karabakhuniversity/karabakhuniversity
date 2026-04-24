@@ -15,7 +15,6 @@ const CONTENT_TYPES = [
   { value: 'student-spotlight', label: 'Student Spotlight' }
 ];
 
-/* ─── TOAST ─── */
 function showToast(msg, isError = false) {
   let t = document.getElementById('toast');
   if (!t) {
@@ -31,7 +30,6 @@ function showToast(msg, isError = false) {
   setTimeout(() => t.classList.remove('show'), 3200);
 }
 
-/* ─── ESCAPE ─── */
 function esc(s) {
   return String(s ?? '')
     .replace(/&/g, '&amp;')
@@ -40,7 +38,6 @@ function esc(s) {
     .replace(/"/g, '&quot;');
 }
 
-/* ─── SUPABASE ─── */
 function ensureSupabase() {
   if (!supabaseDb) {
     showToast('Supabase is not connected. Check supabase.js.', true);
@@ -48,7 +45,6 @@ function ensureSupabase() {
   }
 }
 
-/* ─── AUTH ─── */
 async function adminLogin(email, pass) {
   ensureSupabase();
   const { error } = await supabaseDb.auth.signInWithPassword({ email, password: pass });
@@ -74,7 +70,6 @@ async function requireAuth() {
   return true;
 }
 
-/* ─── STORAGE ─── */
 async function uploadToStorage(bucket, file, folder = '') {
   ensureSupabase();
   const ext = (file.name.split('.').pop() || 'bin').toLowerCase();
@@ -93,7 +88,6 @@ function getPublicFileUrl(bucket, filePath) {
   return data.publicUrl;
 }
 
-/* ─── CONTENT DATA ─── */
 function mapRow(row) {
   return {
     id: row.id,
@@ -105,10 +99,6 @@ function mapRow(row) {
     coverImage: row.cover_path || 'https://via.placeholder.com/400x560/1a3d2e/ffffff?text=No+Cover',
     fileUrl: row.file_path || '#',
     featured: !!row.featured,
-    issueNumber: row.issue_number || '',
-    publicationDate: row.publication_date || '',
-    reviewedItem: row.reviewed_item || '',
-    reviewerName: row.reviewer_name || '',
     studentName: row.student_name || '',
     department: row.department || '',
     achievement: row.achievement || '',
@@ -118,7 +108,11 @@ function mapRow(row) {
 
 async function fetchContent(type = 'all', query = '') {
   ensureSupabase();
-  let req = supabaseDb.from('content_items').select('*').order('created_at', { ascending: false });
+  let req = supabaseDb
+    .from('content_items')
+    .select('*')
+    .in('type', CONTENT_TYPES.map((item) => item.value))
+    .order('created_at', { ascending: false });
   if (type !== 'all') req = req.eq('type', type);
   const { data, error } = await req;
   if (error) throw error;
@@ -134,7 +128,10 @@ async function fetchContent(type = 'all', query = '') {
 
 async function fetchStats() {
   ensureSupabase();
-  const { data, error } = await supabaseDb.from('content_items').select('id, type');
+  const { data, error } = await supabaseDb
+    .from('content_items')
+    .select('id, type')
+    .in('type', CONTENT_TYPES.map((item) => item.value));
   if (error) throw error;
   const items = data || [];
   const counts = { all: items.length };
@@ -144,7 +141,11 @@ async function fetchStats() {
 
 async function getById(id) {
   ensureSupabase();
-  const { data, error } = await supabaseDb.from('content_items').select('*').eq('id', id).single();
+  const { data, error } = await supabaseDb
+    .from('content_items')
+    .select('*')
+    .eq('id', id)
+    .single();
   if (error) throw error;
   return mapRow(data);
 }
@@ -167,7 +168,6 @@ async function deleteItem(id) {
   if (error) throw error;
 }
 
-/* ─── COMMENT DATA ─── */
 async function fetchComments(filter = 'pending') {
   ensureSupabase();
   let req = supabaseDb
@@ -205,7 +205,6 @@ async function fetchCommentCounts() {
   };
 }
 
-/* ─── SIDEBAR ─── */
 function initSidebarToggle() {
   const btn = document.getElementById('sidebarToggle');
   const sidebar = document.getElementById('adminSidebar');
@@ -244,7 +243,6 @@ function markSidebarActive() {
   });
 }
 
-/* ─── LOGIN PAGE ─── */
 async function initLoginPage() {
   const form = document.getElementById('loginForm');
   const errEl = document.getElementById('loginError');
@@ -258,13 +256,16 @@ async function initLoginPage() {
       await adminLogin(email, pass);
       window.location.href = 'admin-dashboard.html';
     } catch (error) {
-      if (errEl) { errEl.textContent = error.message || 'Invalid email or password.'; errEl.classList.add('visible'); }
-      else showToast(error.message || 'Login failed.', true);
+      if (errEl) {
+        errEl.textContent = error.message || 'Invalid email or password.';
+        errEl.classList.add('visible');
+      } else {
+        showToast(error.message || 'Login failed.', true);
+      }
     }
   });
 }
 
-/* ─── DASHBOARD PAGE ─── */
 async function initDashboard() {
   const tableBody = document.getElementById('contentTableBody');
   if (!tableBody) return;
@@ -279,14 +280,15 @@ async function initDashboard() {
   const filterEl = document.getElementById('tableFilter');
 
   if (filterEl) {
-    filterEl.innerHTML = `<option value="all">All Types</option>` +
+    filterEl.innerHTML = '<option value="all">All Types</option>' +
       CONTENT_TYPES.map((t) => `<option value="${t.value}"${filterType === t.value ? ' selected' : ''}>${t.label}</option>`).join('');
     filterEl.addEventListener('change', () => { filterType = filterEl.value; renderTable(); });
   }
   if (searchEl) { searchEl.addEventListener('input', () => { filterQ = searchEl.value; renderTable(); }); }
 
   document.getElementById('logoutBtn')?.addEventListener('click', async () => {
-    await adminLogout(); window.location.href = 'admin-login.html';
+    await adminLogout();
+    window.location.href = 'admin-login.html';
   });
 
   async function renderStats() {
@@ -299,7 +301,7 @@ async function initDashboard() {
         ${CONTENT_TYPES.map((t) => `
           <div class="stat-card">
             <div class="stat-card__n">${counts[t.value]}</div>
-            <div class="stat-card__l">${t.label}s</div>
+            <div class="stat-card__l">${t.label}</div>
           </div>
         `).join('')}
       `;
@@ -310,7 +312,7 @@ async function initDashboard() {
     try {
       const results = await fetchContent(filterType, filterQ);
       if (results.length === 0) {
-        tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--c-text-muted)">No content found.</td></tr>`;
+        tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--c-text-muted)">No content found.</td></tr>';
         return;
       }
       tableBody.innerHTML = results.map((item) => `
@@ -344,7 +346,7 @@ async function initDashboard() {
         });
       });
     } catch (error) {
-      tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--c-text-muted)">Failed to load content.</td></tr>`;
+      tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--c-text-muted)">Failed to load content.</td></tr>';
       showToast(error.message || 'Failed to load dashboard.', true);
     }
   }
@@ -353,7 +355,6 @@ async function initDashboard() {
   await renderTable();
 }
 
-/* ─── COMMENTS PAGE ─── */
 async function initCommentsPage() {
   const tableBody = document.getElementById('commentsTableBody');
   if (!tableBody) return;
@@ -363,7 +364,8 @@ async function initCommentsPage() {
   markSidebarActive();
 
   document.getElementById('logoutBtn')?.addEventListener('click', async () => {
-    await adminLogout(); window.location.href = 'admin-login.html';
+    await adminLogout();
+    window.location.href = 'admin-login.html';
   });
 
   let currentFilter = new URLSearchParams(window.location.search).get('filter') || 'pending';
@@ -389,13 +391,13 @@ async function initCommentsPage() {
   }
 
   async function renderComments() {
-    tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--c-text-muted)">Loading…</td></tr>`;
+    tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--c-text-muted)">Loading...</td></tr>';
     try {
       const comments = await fetchComments(currentFilter);
       await renderCounts();
 
       if (comments.length === 0) {
-        tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--c-text-muted)">No comments found.</td></tr>`;
+        tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--c-text-muted)">No comments found.</td></tr>';
         return;
       }
 
@@ -403,14 +405,14 @@ async function initCommentsPage() {
         const contentTitle = c.content_items?.title || '—';
         const date = c.created_at ? new Date(c.created_at).toLocaleDateString() : '—';
         const statusBadge = c.approved
-          ? `<span class="td-type-badge" style="background:rgba(16,185,129,.12);color:#059669">Approved</span>`
-          : `<span class="td-type-badge" style="background:rgba(245,158,11,.12);color:#d97706">Pending</span>`;
+          ? '<span class="td-type-badge" style="background:rgba(16,185,129,.12);color:#059669">Approved</span>'
+          : '<span class="td-type-badge" style="background:rgba(245,158,11,.12);color:#d97706">Pending</span>';
 
         return `
           <tr data-comment-id="${esc(c.id)}">
             <td class="td-title"><span title="${esc(c.author_name)}">${esc(c.author_name)}</span></td>
             <td style="max-width:300px"><span style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(c.body)}</span></td>
-            <td><span title="${esc(contentTitle)}">${esc(contentTitle.length > 30 ? contentTitle.slice(0, 30) + '…' : contentTitle)}</span></td>
+            <td><span title="${esc(contentTitle)}">${esc(contentTitle.length > 30 ? contentTitle.slice(0, 30) + '...' : contentTitle)}</span></td>
             <td>${statusBadge}</td>
             <td>${date}</td>
             <td>
@@ -427,33 +429,32 @@ async function initCommentsPage() {
         btn.addEventListener('click', async () => {
           try {
             await approveComment(btn.dataset.approve);
-            showToast('Yorum təsdiqləndi.');
+            showToast('Comment approved.');
             await renderComments();
-          } catch (error) { showToast(error.message || 'Xəta baş verdi.', true); }
+          } catch (error) { showToast(error.message || 'An error occurred.', true); }
         });
       });
 
       tableBody.querySelectorAll('[data-delete-comment]').forEach((btn) => {
         btn.addEventListener('click', async () => {
-          if (!confirm('Bu yorumu silmək istəyirsiniz?')) return;
+          if (!confirm('Delete this comment?')) return;
           try {
             await deleteComment(btn.dataset.deleteComment);
-            showToast('Yorum silindi.');
+            showToast('Comment deleted.');
             await renderComments();
-          } catch (error) { showToast(error.message || 'Xəta baş verdi.', true); }
+          } catch (error) { showToast(error.message || 'An error occurred.', true); }
         });
       });
 
     } catch (error) {
-      tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--c-text-muted)">Yorumlar yüklənmədi.</td></tr>`;
-      showToast(error.message || 'Xəta baş verdi.', true);
+      tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--c-text-muted)">Comments failed to load.</td></tr>';
+      showToast(error.message || 'An error occurred.', true);
     }
   }
 
   await renderComments();
 }
 
-/* ─── FORM PAGE ─── */
 async function initFormPage() {
   const form = document.getElementById('contentForm');
   if (!form) return;
@@ -471,7 +472,7 @@ async function initFormPage() {
   const typeSelect = document.getElementById('fieldType');
 
   if (typeSelect) {
-    typeSelect.innerHTML = `<option value="">— Select Type —</option>` +
+    typeSelect.innerHTML = '<option value="">— Select Type —</option>' +
       CONTENT_TYPES.map((t) => `<option value="${t.value}">${t.label}</option>`).join('');
     typeSelect.addEventListener('change', () => toggleDynamicFields(typeSelect.value));
   }
@@ -489,24 +490,31 @@ async function initFormPage() {
       setField('fieldAuthor', editItem.author);
       setField('fieldCategory', editItem.category);
       setField('fieldDesc', editItem.description);
-      if (editItem.coverImage) { setField('fieldCoverUrl', editItem.coverImage); showCoverPreview(editItem.coverImage); }
-      if (editItem.fileUrl && editItem.fileUrl !== '#') { setField('fieldPdfUrl', editItem.fileUrl); showPdfPreview(editItem.fileUrl.split('/').pop(), 'Uploaded'); }
-      if (editItem.issueNumber) setField('fieldIssueNumber', editItem.issueNumber);
-      if (editItem.publicationDate) setField('fieldPubDate', editItem.publicationDate);
-      if (editItem.reviewedItem) setField('fieldReviewedItem', editItem.reviewedItem);
-      if (editItem.reviewerName) setField('fieldReviewerName', editItem.reviewerName);
+      if (editItem.coverImage) {
+        setField('fieldCoverUrl', editItem.coverImage);
+        showCoverPreview(editItem.coverImage);
+      }
+      if (editItem.fileUrl && editItem.fileUrl !== '#') {
+        setField('fieldPdfUrl', editItem.fileUrl);
+        showPdfPreview(editItem.fileUrl.split('/').pop(), 'Uploaded');
+      }
       if (editItem.studentName) setField('fieldStudentName', editItem.studentName);
       if (editItem.department) setField('fieldDepartment', editItem.department);
       if (editItem.achievement) setField('fieldAchievement', editItem.achievement);
       toggleDynamicFields(editItem.type);
-    } catch (error) { showToast(error.message || 'Failed to load content for editing.', true); }
+    } catch (error) {
+      showToast(error.message || 'Failed to load content for editing.', true);
+    }
   } else {
     if (formTitle) formTitle.textContent = 'Add New Content';
     if (formSub) formSub.textContent = 'Fill in the details to publish new content.';
   }
 
   document.getElementById('cancelBtn')?.addEventListener('click', () => { window.location.href = 'admin-dashboard.html'; });
-  document.getElementById('logoutBtn')?.addEventListener('click', async () => { await adminLogout(); window.location.href = 'admin-login.html'; });
+  document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+    await adminLogout();
+    window.location.href = 'admin-login.html';
+  });
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -516,34 +524,34 @@ async function initFormPage() {
     if (!title) { showToast('Title is required.', true); return; }
 
     const payload = {
-      type, title,
+      type,
+      title,
       author: getField('fieldAuthor') || 'Unknown',
       category: getField('fieldCategory') || 'General',
       description: getField('fieldDesc') || '',
       cover_path: getField('fieldCoverUrl') || 'https://via.placeholder.com/400x560/1a3d2e/ffffff?text=No+Cover',
       file_path: getField('fieldPdfUrl') || '#',
       featured: editItem ? !!editItem.featured : false,
-      issue_number: type === 'magazine' ? (getField('fieldIssueNumber') || null) : null,
-      publication_date: type === 'magazine' ? (getField('fieldPubDate') || null) : null,
-      reviewed_item: type === 'review' ? (getField('fieldReviewedItem') || null) : null,
-      reviewer_name: type === 'review' ? (getField('fieldReviewerName') || null) : null
+      student_name: type === 'student-spotlight' ? (getField('fieldStudentName') || null) : null,
+      department: type === 'student-spotlight' ? (getField('fieldDepartment') || null) : null,
+      achievement: type === 'student-spotlight' ? (getField('fieldAchievement') || null) : null
     };
 
-    if (type === 'student-spotlight') {
-      payload.student_name = getField('fieldStudentName') || null;
-      payload.department   = getField('fieldDepartment') || null;
-      payload.achievement  = getField('fieldAchievement') || null;
-    }
-
     try {
-      if (editId) { await updateItem(editId, payload); showToast('Content updated successfully.'); }
-      else { await insertItem(payload); showToast('Content added successfully.'); }
+      if (editId) {
+        await updateItem(editId, payload);
+        showToast('Content updated successfully.');
+      } else {
+        await insertItem(payload);
+        showToast('Content added successfully.');
+      }
       setTimeout(() => { window.location.href = 'admin-dashboard.html'; }, 900);
-    } catch (error) { showToast(error.message || 'Failed to save content.', true); }
+    } catch (error) {
+      showToast(error.message || 'Failed to save content.', true);
+    }
   });
 }
 
-/* ─── COVER UPLOAD ─── */
 function initCoverUpload() {
   const zone = document.getElementById('coverUploadZone');
   const input = document.getElementById('fieldCoverFile');
@@ -561,17 +569,26 @@ function initCoverUpload() {
 
   zone.addEventListener('click', (e) => {
     if (e.target === removeBtn || removeBtn?.contains(e.target) || e.target === input) return;
-    e.preventDefault(); openPicker();
+    e.preventDefault();
+    openPicker();
   });
   zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('upload-zone--drag'); });
   zone.addEventListener('dragleave', () => { zone.classList.remove('upload-zone--drag'); });
   zone.addEventListener('drop', (e) => {
-    e.preventDefault(); zone.classList.remove('upload-zone--drag');
-    const file = e.dataTransfer.files[0]; if (file) handleCoverFile(file);
+    e.preventDefault();
+    zone.classList.remove('upload-zone--drag');
+    const file = e.dataTransfer.files[0];
+    if (file) handleCoverFile(file);
   });
-  input.addEventListener('change', () => { pickerOpening = false; if (input.files[0]) handleCoverFile(input.files[0]); });
+  input.addEventListener('change', () => {
+    pickerOpening = false;
+    if (input.files[0]) handleCoverFile(input.files[0]);
+  });
   input.addEventListener('click', (e) => e.stopPropagation());
-  removeBtn?.addEventListener('click', (e) => { e.stopPropagation(); clearCoverPreview(); });
+  removeBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    clearCoverPreview();
+  });
 
   async function handleCoverFile(file) {
     if (!file.type.startsWith('image/')) { showToast('Please select a valid image file (JPG, PNG, WebP).', true); return; }
@@ -580,7 +597,8 @@ function initCoverUpload() {
       showToast('Uploading cover...');
       const filePath = await uploadToStorage('covers', file, 'images');
       const publicUrl = getPublicFileUrl('covers', filePath);
-      hidden.value = publicUrl; showCoverPreview(publicUrl);
+      hidden.value = publicUrl;
+      showCoverPreview(publicUrl);
       showToast('Cover uploaded successfully.');
     } catch (error) { showToast(error.message || 'Cover upload failed.', true); }
   }
@@ -608,7 +626,6 @@ function clearCoverPreview() {
   if (input) input.value = '';
 }
 
-/* ─── PDF UPLOAD ─── */
 function initPdfUpload() {
   const zone = document.getElementById('pdfUploadZone');
   const input = document.getElementById('fieldPdfFile');
@@ -619,23 +636,33 @@ function initPdfUpload() {
   let pickerOpening = false;
   function openPicker() {
     if (pickerOpening) return;
-    pickerOpening = true; input.click();
+    pickerOpening = true;
+    input.click();
     setTimeout(() => { pickerOpening = false; }, 300);
   }
 
   zone.addEventListener('click', (e) => {
     if (e.target === removeBtn || removeBtn?.contains(e.target) || e.target === input) return;
-    e.preventDefault(); openPicker();
+    e.preventDefault();
+    openPicker();
   });
   zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('upload-zone--drag'); });
   zone.addEventListener('dragleave', () => { zone.classList.remove('upload-zone--drag'); });
   zone.addEventListener('drop', (e) => {
-    e.preventDefault(); zone.classList.remove('upload-zone--drag');
-    const file = e.dataTransfer.files[0]; if (file) handlePdfFile(file);
+    e.preventDefault();
+    zone.classList.remove('upload-zone--drag');
+    const file = e.dataTransfer.files[0];
+    if (file) handlePdfFile(file);
   });
-  input.addEventListener('change', () => { pickerOpening = false; if (input.files[0]) handlePdfFile(input.files[0]); });
+  input.addEventListener('change', () => {
+    pickerOpening = false;
+    if (input.files[0]) handlePdfFile(input.files[0]);
+  });
   input.addEventListener('click', (e) => e.stopPropagation());
-  removeBtn?.addEventListener('click', (e) => { e.stopPropagation(); clearPdfPreview(); });
+  removeBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    clearPdfPreview();
+  });
 
   async function handlePdfFile(file) {
     if (file.type !== 'application/pdf') { showToast('Please select a valid PDF file.', true); return; }
@@ -647,7 +674,8 @@ function initPdfUpload() {
       showToast('Uploading PDF...');
       const filePath = await uploadToStorage('files', file, 'pdfs');
       const publicUrl = getPublicFileUrl('files', filePath);
-      hidden.value = publicUrl; showPdfPreview(file.name, sizeFmt);
+      hidden.value = publicUrl;
+      showPdfPreview(file.name, sizeFmt);
       showToast('PDF uploaded successfully.');
     } catch (error) { showToast(error.message || 'PDF upload failed.', true); }
   }
@@ -675,7 +703,6 @@ function clearPdfPreview() {
   if (input) input.value = '';
 }
 
-/* ─── HELPERS ─── */
 function setField(id, val) {
   const el = document.getElementById(id);
   if (el) el.value = val || '';
@@ -686,15 +713,10 @@ function getField(id) {
 }
 
 function toggleDynamicFields(type) {
-  const magFields = document.getElementById('magazineFields');
-  const revFields = document.getElementById('reviewFields');
   const spotFields = document.getElementById('spotlightFields');
-  if (magFields) magFields.classList.toggle('visible', type === 'magazine');
-  if (revFields) revFields.classList.toggle('visible', type === 'review');
   if (spotFields) spotFields.classList.toggle('visible', type === 'student-spotlight');
 }
 
-/* ─── INIT ─── */
 document.addEventListener('DOMContentLoaded', async () => {
   const page = window.location.pathname.split('/').pop();
   if (page === 'admin-login.html' || page === '') await initLoginPage();

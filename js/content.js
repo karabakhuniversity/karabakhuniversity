@@ -21,24 +21,18 @@ const yearEl = document.getElementById('footerYear');
 
 const CONTENT_TYPES = [
   { value: 'book', label: 'Books' },
-  { value: 'article', label: 'Articles' },
+  { value: 'article', label: 'Magazines & Articles' },
   { value: 'essay', label: 'Essays' },
-  { value: 'magazine', label: 'Magazines' },
   { value: 'story', label: 'Stories' },
-  { value: 'review', label: 'Reviews' },
-  { value: 'art-photo', label: 'Art & Photo' },
   { value: 'student-spotlight', label: 'Student Spotlight' }
 ];
 
 const TYPE_META = {
   all: { label: 'All Content', desc: 'Browse the complete digital library' },
   book: { label: 'Books', desc: 'Academic textbooks and reference works' },
-  article: { label: 'Articles', desc: 'Research and academic articles' },
+  article: { label: 'Magazines & Articles', desc: 'Magazines, journals, and academic articles' },
   essay: { label: 'Essays', desc: 'Student and faculty essays' },
-  magazine: { label: 'Magazines', desc: 'Student and departmental magazines' },
   story: { label: 'Stories', desc: 'Creative fiction and short stories' },
-  review: { label: 'Reviews', desc: 'Critical reviews and evaluations' },
-  'art-photo': { label: 'Art & Photo', desc: 'Visual art and photo collections' },
   'student-spotlight': { label: 'Student Spotlight', desc: 'Featured student profiles and achievements' }
 };
 
@@ -78,6 +72,7 @@ function mapRow(row) {
 function getFilteredContent() {
   const q = searchQuery.trim().toLowerCase();
   return allContent.filter((item) => {
+    const matchesAllowedType = CONTENT_TYPES.some((type) => type.value === item.type);
     const matchesType = activeType === 'all' || item.type === activeType;
     const matchesQuery =
       !q ||
@@ -86,11 +81,9 @@ function getFilteredContent() {
       item.category.toLowerCase().includes(q) ||
       (item.studentName && item.studentName.toLowerCase().includes(q)) ||
       (item.department && item.department.toLowerCase().includes(q));
-    return matchesType && matchesQuery;
+    return matchesAllowedType && matchesType && matchesQuery;
   });
 }
-
-/* ─── COMMENTS ─── */
 
 function formatDate(iso) {
   if (!iso) return '';
@@ -147,13 +140,13 @@ function buildCommentSection(itemId) {
         <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
           <path d="M1 2.5h11M1 6.5h7M1 10.5h5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
         </svg>
-        Reviews
+        Comments
         <span class="comments-toggle__count" id="ccount-${esc(itemId)}"></span>
       </button>
 
       <div class="comments-body" id="cbody-${esc(itemId)}" hidden>
         <div class="comments-list" id="clist-${esc(itemId)}">
-          <p class="comments-loading">Loading…</p>
+          <p class="comments-loading">Loading...</p>
         </div>
 
         <form class="comment-form" id="cform-${esc(itemId)}" novalidate>
@@ -161,14 +154,14 @@ function buildCommentSection(itemId) {
           <input
             type="text"
             class="comment-form__input"
-            placeholder="Name…"
+            placeholder="Name..."
             maxlength="80"
             required
             aria-label="Ad"
           />
           <textarea
             class="comment-form__textarea"
-            placeholder="your comment…"
+            placeholder="Your comment..."
             rows="3"
             maxlength="1000"
             required
@@ -178,7 +171,7 @@ function buildCommentSection(itemId) {
             <span class="comment-form__note">It will appear after admin approval.</span>
             <button type="submit" class="btn btn--primary btn--sm">Submit</button>
           </div>
-          <p class="comment-form__success" hidden>✓ Your comment has been submitted, awaiting approval.</p>
+          <p class="comment-form__success" hidden>Your comment has been submitted, awaiting approval.</p>
         </form>
       </div>
     </div>
@@ -218,7 +211,7 @@ function initCommentSection(itemId) {
     if (!text) { textInput.focus(); return; }
 
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Sending…';
+    submitBtn.textContent = 'Sending...';
 
     try {
       await submitComment(itemId, name, text);
@@ -236,8 +229,6 @@ function initCommentSection(itemId) {
   });
 }
 
-/* ─── CARD BUILDERS ─── */
-
 function buildCard(item, delay) {
   if (item.type === 'student-spotlight') return buildSpotlightCard(item, delay);
 
@@ -249,10 +240,12 @@ function buildCard(item, delay) {
   return `
     <article class="card" style="animation-delay:${delay}ms" data-id="${esc(item.id)}">
       <div class="card__cover-wrap">
-        <img class="card__cover"
+        <img class="card__cover js-enlarge-image"
              src="${esc(item.coverImage)}"
              alt="Cover: ${esc(item.title)}"
              loading="lazy"
+             data-fullsrc="${esc(item.coverImage)}"
+             data-title="${esc(item.title)}"
              onerror="this.src='https://via.placeholder.com/400x560/1a3d2e/ffffff?text=No+Cover'"/>
         <span class="card__badge card__badge--${esc(item.type)}">${esc(typeLabel(item.type))}</span>
       </div>
@@ -284,10 +277,12 @@ function buildSpotlightCard(item, delay) {
   return `
     <article class="card card--spotlight" style="animation-delay:${delay}ms" data-id="${esc(item.id)}">
       <div class="card__cover-wrap">
-        <img class="card__cover card__cover--portrait"
+        <img class="card__cover card__cover--portrait js-enlarge-image"
              src="${esc(item.coverImage)}"
              alt="Photo of ${esc(item.title)}"
              loading="lazy"
+             data-fullsrc="${esc(item.coverImage)}"
+             data-title="${esc(item.title)}"
              onerror="this.src='https://via.placeholder.com/400x400/1a3d2e/ffffff?text=Student'"/>
         <span class="card__badge card__badge--student-spotlight">Student Spotlight</span>
       </div>
@@ -304,13 +299,12 @@ function buildSpotlightCard(item, delay) {
   `;
 }
 
-/* ─── LOAD & RENDER ─── */
-
 async function loadContent() {
   if (!supabaseDb) throw new Error('Supabase is not connected.');
   const { data, error } = await supabaseDb
     .from('content_items')
     .select('*')
+    .in('type', CONTENT_TYPES.map((type) => type.value))
     .order('created_at', { ascending: false });
   if (error) throw error;
   allContent = (data || []).map(mapRow);
@@ -378,12 +372,105 @@ function markActiveNav() {
   });
 }
 
+function ensureImageLightbox() {
+  if (document.getElementById('imageLightbox')) return;
+
+  const style = document.createElement('style');
+  style.textContent = `
+    .js-enlarge-image { cursor: zoom-in; }
+    .image-lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.82);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      z-index: 9999;
+    }
+    .image-lightbox.open { display: flex; }
+    .image-lightbox__dialog {
+      position: relative;
+      max-width: min(92vw, 980px);
+      max-height: 92vh;
+      width: fit-content;
+    }
+    .image-lightbox__img {
+      display: block;
+      max-width: 100%;
+      max-height: calc(92vh - 56px);
+      border-radius: 18px;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+    }
+    .image-lightbox__caption {
+      margin-top: 12px;
+      text-align: center;
+      color: #fff;
+      font: 500 14px/1.4 'DM Sans', sans-serif;
+    }
+    .image-lightbox__close {
+      position: absolute;
+      top: -14px;
+      right: -14px;
+      width: 38px;
+      height: 38px;
+      border: 0;
+      border-radius: 999px;
+      background: #fff;
+      color: #111;
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+    }
+  `;
+  document.head.appendChild(style);
+
+  const lightbox = document.createElement('div');
+  lightbox.id = 'imageLightbox';
+  lightbox.className = 'image-lightbox';
+  lightbox.innerHTML = `
+    <div class="image-lightbox__dialog" role="dialog" aria-modal="true" aria-label="Image preview">
+      <button type="button" class="image-lightbox__close" aria-label="Close preview">×</button>
+      <img class="image-lightbox__img" alt="Expanded cover image"/>
+      <p class="image-lightbox__caption"></p>
+    </div>
+  `;
+  document.body.appendChild(lightbox);
+
+  const closeBtn = lightbox.querySelector('.image-lightbox__close');
+  const img = lightbox.querySelector('.image-lightbox__img');
+  const caption = lightbox.querySelector('.image-lightbox__caption');
+
+  function closeLightbox() {
+    lightbox.classList.remove('open');
+    img.src = '';
+    caption.textContent = '';
+  }
+
+  document.addEventListener('click', (event) => {
+    const trigger = event.target.closest('.js-enlarge-image');
+    if (!trigger) return;
+    img.src = trigger.dataset.fullsrc || trigger.getAttribute('src') || '';
+    caption.textContent = trigger.dataset.title || trigger.getAttribute('alt') || '';
+    lightbox.classList.add('open');
+  });
+
+  closeBtn?.addEventListener('click', closeLightbox);
+  lightbox.addEventListener('click', (event) => {
+    if (event.target === lightbox) closeLightbox();
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && lightbox.classList.contains('open')) closeLightbox();
+  });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   if (yearEl) yearEl.textContent = new Date().getFullYear();
   if (emptyEl) { emptyEl.hidden = true; emptyEl.style.display = 'none'; }
 
   initSearch();
   initMobileNav();
+  ensureImageLightbox();
 
   try {
     await loadContent();
