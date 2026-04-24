@@ -8,7 +8,8 @@ const supabaseDb = window.supabaseClient;
 
 const CONTENT_TYPES = [
   { value: 'book', label: 'Book' },
-  { value: 'article', label: 'Magazines & Articles' },
+  { value: 'article', label: 'Journals & Articles' },
+  { value: 'magazine', label: 'Magazine' },
   { value: 'essay', label: 'Essay' },
   { value: 'story', label: 'Story' },
   { value: 'student-spotlight', label: 'Student Spotlight' }

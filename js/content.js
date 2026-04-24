@@ -21,7 +21,8 @@ const yearEl = document.getElementById('footerYear');
 
 const CONTENT_TYPES = [
   { value: 'book', label: 'Books' },
-  { value: 'article', label: 'Magazines & Articles' },
+  { value: 'article', label: 'Journals & Articles' },
+  { value: 'magazine', label: 'Magazines' },
   { value: 'essay', label: 'Essays' },
   { value: 'story', label: 'Stories' },
   { value: 'student-spotlight', label: 'Student Spotlight' }
@@ -30,7 +31,8 @@ const CONTENT_TYPES = [
 const TYPE_META = {
   all: { label: 'All Content', desc: 'Browse the complete digital library' },
   book: { label: 'Books', desc: 'Academic textbooks and reference works' },
-  article: { label: 'Magazines & Articles', desc: 'Magazines, journals, and academic articles' },
+  article: { label: 'Journals & Articles', desc: 'Academic journals, papers, and articles' },
+  magazine: { label: 'Magazines', desc: 'University and student magazine issues' },
   essay: { label: 'Essays', desc: 'Student and faculty essays' },
   story: { label: 'Stories', desc: 'Creative fiction and short stories' },
   'student-spotlight': { label: 'Student Spotlight', desc: 'Featured student profiles and achievements' }

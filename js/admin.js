@@ -9,7 +9,8 @@ const supabaseDb = window.supabaseClient;
 
 const CONTENT_TYPES = [
   { value: 'book', label: 'Book' },
-  { value: 'article', label: 'Magazines & Articles' },
+  { value: 'article', label: 'Journals & Articles' },
+  { value: 'magazine', label: 'Magazine' },
   { value: 'essay', label: 'Essay' },
   { value: 'story', label: 'Story' },
   { value: 'student-spotlight', label: 'Student Spotlight' }
@@ -99,6 +100,8 @@ function mapRow(row) {
     coverImage: row.cover_path || 'https://via.placeholder.com/400x560/1a3d2e/ffffff?text=No+Cover',
     fileUrl: row.file_path || '#',
     featured: !!row.featured,
+    issueNumber: row.issue_number || '',
+    publicationDate: row.publication_date || '',
     studentName: row.student_name || '',
     department: row.department || '',
     achievement: row.achievement || '',
@@ -501,6 +504,8 @@ async function initFormPage() {
       if (editItem.studentName) setField('fieldStudentName', editItem.studentName);
       if (editItem.department) setField('fieldDepartment', editItem.department);
       if (editItem.achievement) setField('fieldAchievement', editItem.achievement);
+      if (editItem.issueNumber) setField('fieldIssueNumber', editItem.issueNumber);
+      if (editItem.publicationDate) setField('fieldPubDate', editItem.publicationDate);
       toggleDynamicFields(editItem.type);
     } catch (error) {
       showToast(error.message || 'Failed to load content for editing.', true);
@@ -532,6 +537,8 @@ async function initFormPage() {
       cover_path: getField('fieldCoverUrl') || 'https://via.placeholder.com/400x560/1a3d2e/ffffff?text=No+Cover',
       file_path: getField('fieldPdfUrl') || '#',
       featured: editItem ? !!editItem.featured : false,
+      issue_number: type === 'magazine' ? (getField('fieldIssueNumber') || null) : null,
+      publication_date: type === 'magazine' ? (getField('fieldPubDate') || null) : null,
       student_name: type === 'student-spotlight' ? (getField('fieldStudentName') || null) : null,
       department: type === 'student-spotlight' ? (getField('fieldDepartment') || null) : null,
       achievement: type === 'student-spotlight' ? (getField('fieldAchievement') || null) : null
@@ -713,7 +720,9 @@ function getField(id) {
 }
 
 function toggleDynamicFields(type) {
+  const magFields = document.getElementById('magazineFields');
   const spotFields = document.getElementById('spotlightFields');
+  if (magFields) magFields.classList.toggle('visible', type === 'magazine');
   if (spotFields) spotFields.classList.toggle('visible', type === 'student-spotlight');
 }
 
